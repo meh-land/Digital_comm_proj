@@ -13,8 +13,12 @@ clc
 n_per_SNR = 1e5;
 %SNR in dB
 SNR = 0:2:30;
-% Array to keep track of the BER at every SNR
-BER = zeros(1, length(SNR));
+
+% Array to keep track of the BER of the output of simple detector at every SNR
+BER_simple = zeros(1, length(SNR));
+% Array to keep track of the BER of the output of MF at every SNR
+BER_MF = zeros(1, length(SNR));
+
 % # of samples in the waveform
 m = 20;
 S1 = ones(1,m);
@@ -53,51 +57,55 @@ for snr_i = 1:length(SNR)
     %(4)-Noise
     % Adding awgn to the waveform
     Rx_sequence = awgn(waveform,SNR(snr_i),'measured');
-
-    % This part graphs the signal after adding noise (useful for testing but
-    % with large number of bits the graphs are useless)
-    %n = 0:size(Rx_sequence,2)-1;
-    % figure;
-    % stem(n,waveform)
-    % hold
-    % stem(n,Rx_sequence)
-    % legend('Original Signal','Signal with AWGN')
  
     %(5)-Convolution:
     %A - Normal Conv:
     h_mf = (S1 - S2);
     MF_out = zeros(1, length(message));
     for i = 1:size(message,2)
-    n1 = (i-1)*m + 1 ;
-    n2 = i*m;
-    MF_out(n1:n2) =  cconv(h_mf, Rx_sequence(n1:n2), m);
+        n1 = (i-1)*m + 1 ;
+        n2 = i*m;
+        MF_out(n1:n2) =  cconv(h_mf, Rx_sequence(n1:n2), m);
     end
     % Normalize the output of the MF to make decisions accurately
     MF_out = MF_out / max(MF_out);
     
-    % figure
-    % stem(n,MF_out)
-    % title("Output of MF");
-
     %(5) Decision:
     Vth = (S1(taw) + S2(taw))/2;
+    simple_detector_decision = zeros(1, length(message));
     MF_out_decided = zeros(1, length(message));
     for i = 1:size(message,2)
-    n1 = (i-1)*m + 1 ;
-    n2 = i*m;
-    current_sample = MF_out(n1 + taw - 1);
-    if (current_sample > Vth)
-        MF_out_decided(i) = 1;
-    end
+        n1 = (i-1)*m + 1 ;
+        n2 = i*m;
+        % Make decision of simple detector
+        current_sample = Rx_sequence(n1 + taw - 1);
+        if (current_sample > Vth)
+            simple_detector_decision(i) = 1;
+        end
+        
+        % Make decision of MF
+        current_sample = MF_out(n1 + taw - 1);
+        if (current_sample > Vth)
+            MF_out_decided(i) = 1;
+        end
     end
 
     % Get BER
-    % get number of errors
-    err_num = sum(xor(message, MF_out_decided));
-    BER(snr_i) = err_num;
+    % get number of errors for simple detector
+    err_num_simple = sum(xor(message, simple_detector_decision));
+    BER_simple(snr_i) = err_num_simple;
+
+    % get number of errors for MF
+    err_num_MF = sum(xor(message, MF_out_decided));
+    BER_MF(snr_i) = err_num_MF;
 end
 
 %% Graph BER vs SNR
 figure
-semilogy(SNR, BER);
+semilogy(SNR, BER_simple, "linewidth", 1.5);
+hold
+semilogy(SNR, BER_MF, "linewidth", 1.5);
 title("BER vs SNR");
+legend("Simple detector", "MF");
+
+
