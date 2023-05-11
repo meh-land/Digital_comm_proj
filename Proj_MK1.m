@@ -40,20 +40,23 @@ message = randi(2, 1, number_of_bits) - 1;
 waveform = zeros(1, length(message) * m); 
 %%
 %Signal Generation:
+% w_i is the index of the waveform and m_i is the index of the message (1s
+    % amd 0s)
+for w_i = 1:m:length(waveform)
+    % I derived this equation to convert w_i to m_i...... trust me
+    m_i = floor((1/m) * w_i + (1- (1/m)));
+    if message (m_i) == 1
+        waveform(w_i : w_i+m-1) = S1;
+    else
+        waveform(w_i : w_i+m-1) = S2;
+    end
+end
+% Calculate power of transmitted signal
+Tx_power = sum(waveform.^2) / length(waveform);
+disp(['Transmitted power = ', num2str(Tx_power)]);
+
 % Loop to iterate over all SNR values
 for snr_i = 1:length(SNR)
-    % w_i is the index of the waveform and m_i is the index of the message (1s
-    % amd 0s)
-    for w_i = 1:m:length(waveform)
-        % I derived this equation to convert w_i to m_i...... trust me
-        m_i = floor((1/m) * w_i + (1- (1/m)));
-        if message (m_i) == 1
-            waveform(w_i : w_i+m-1) = S1;
-        else
-            waveform(w_i : w_i+m-1) = S2;
-        end
-    end
-    %
     %(4)-Noise
     % Adding awgn to the waveform
     Rx_sequence = awgn(waveform,SNR(snr_i),'measured');
