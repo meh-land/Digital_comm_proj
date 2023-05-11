@@ -17,6 +17,8 @@ SNR = 0:2:30;
 m = 20;
 S1 = ones(1,m);
 S2 = zeros(1,m);
+% time of sampling at reciever
+taw = 17;
 %%
 %Signal Generation:
 %This part is meant for experimentation only, as it uses known inputs;
@@ -60,3 +62,19 @@ end
 figure
 stem(n,MF_out)
 title("Output of MF");
+
+%(5) Decision:
+Vth = S1(taw) - S2(taw);
+MF_out_decided = zeros(1, length(known_message));
+for i = 1:size(known_message,2)
+   n1 = (i-1)*m + 1 ;
+   n2 = i*m;
+   current_sample = MF_out(n1 + taw - 1);
+   if (current_sample > Vth)
+       MF_out_decided(i) = 1;
+   end
+end
+
+%% Get BER
+% get number of errors
+err_num = sum(xor(known_message, MF_out_decided));
