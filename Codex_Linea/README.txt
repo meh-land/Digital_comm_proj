@@ -1,0 +1,1 @@
+Open lineCode.m and simply press run.
