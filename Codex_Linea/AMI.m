@@ -29,7 +29,7 @@ function AMI(r, bitrate)
     psdx_db = pow2db(psdx);
     
     max_index = find(psdx_db == max(psdx_db));
-    bandwidth_index = find(psdx_db(max_index+1:end) < (psdx(max_index) - 3));
+    bandwidth_index = find(psdx_db(max_index+1:end) < (psdx_db(max_index) - 3));
     bandwidth_AMI = freq(bandwidth_index(1) + max_index)
     
     subplot(2,1,2);
