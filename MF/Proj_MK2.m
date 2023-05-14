@@ -23,11 +23,11 @@ BER_MF = zeros(1, length(SNR));
 BER_C = zeros(1, length(SNR));
 
 % # of samples in the waveform
-m = 20;
+m = 100;
 S1 = ones(1,m);
 S2 = zeros(1,m);
 % time of sampling at reciever
-taw = 20;
+taw = 100;
 
 %(2)-Binary Data Vector
 %A binary message meant to be sent (10*10^6 because the pdf states that "the resultant vector 
