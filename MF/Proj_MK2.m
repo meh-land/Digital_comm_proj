@@ -11,7 +11,7 @@ clc
 
 %Part1: Matched Filter and Correlators
 %(1)-Parameter Definition:
-n_per_SNR = 1e5;
+n_per_SNR = 1e6;
 %SNR in dB
 SNR = 0:2:30;
 
@@ -32,7 +32,7 @@ taw = 20;
 %(2)-Binary Data Vector
 %A binary message meant to be sent (10*10^6 because the pdf states that "the resultant vector 
 % will be 10e6 samples")
-number_of_bits = (10*10^5) / m;
+number_of_bits = (10*10^6) / m;
 
 % randi starts from 1 to some number so I generated a vector of 1s and 2s
 % then subtract 1 to make it 1s and 0s
