@@ -29,7 +29,7 @@ taw = 17;
 %(2)-Binary Data Vector
 %A binary message meant to be sent (10*10^6 because the pdf states that "the resultant vector 
 % will be 10e6 samples")
-number_of_bits = (10*10^4) / m;
+number_of_bits = (10*10^6) / m;
 
 % randi starts from 1 to some number so I generated a vector of 1s and 2s
 % then subtract 1 to make it 1s and 0s
@@ -41,7 +41,7 @@ waveform = zeros(1, length(message) * m);
 %%
 %Signal Generation:
 % w_i is the index of the waveform and m_i is the index of the message (1s
-    % amd 0s)
+    % and 0s)
 for w_i = 1:m:length(waveform)
     % I derived this equation to convert w_i to m_i...... trust me
     m_i = floor((1/m) * w_i + (1- (1/m)));
@@ -80,12 +80,12 @@ for snr_i = 1:length(SNR)
     for i = 1:size(message,2)
         n1 = (i-1)*m + 1 ;
         n2 = i*m;
-        for j = 1:20
-           r1(j) = Rx_sequence(n1+j-1) * S1(j); 
-           r1_sum = [r1_sum r1(j)];
+        for j = 1:m
+           r1 = Rx_sequence(n1+j-1) * S1(j); 
+           r1_sum = [r1_sum r1];
            
-           r2(j) = Rx_sequence(n1+j-1) .* S2(j); 
-           r2_sum = [r2_sum r2(j)];
+           r2 = Rx_sequence(n1+j-1) .* S2(j); 
+           r2_sum = [r2_sum r2];
         end
         r_sum = r1_sum - r2_sum;
     end 
