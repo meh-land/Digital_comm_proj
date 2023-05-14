@@ -5,6 +5,7 @@
     %% Yahia Walid 19016891
     %% Youssef Mohamed 19016941
 %%
+close all
 clear
 clc
 
@@ -19,17 +20,19 @@ BER_simple = zeros(1, length(SNR));
 % Array to keep track of the BER of the output of MF at every SNR
 BER_MF = zeros(1, length(SNR));
 
+BER_C = zeros(1, length(SNR));
+
 % # of samples in the waveform
 m = 20;
 S1 = ones(1,m);
 S2 = zeros(1,m);
 % time of sampling at reciever
-taw = 17;
+taw = 20;
 
 %(2)-Binary Data Vector
 %A binary message meant to be sent (10*10^6 because the pdf states that "the resultant vector 
 % will be 10e6 samples")
-number_of_bits = (10*10^6) / m;
+number_of_bits = (10*10^5) / m;
 
 % randi starts from 1 to some number so I generated a vector of 1s and 2s
 % then subtract 1 to make it 1s and 0s
@@ -74,23 +77,12 @@ for snr_i = 1:length(SNR)
     MF_out = MF_out / max(MF_out);
     
     %B - Correaltor:
-    C_out = [];
-    r1_sum = [];
-    r2_sum = [];
-    for i = 1:size(message,2)
-        n1 = (i-1)*m + 1 ;
-        n2 = i*m;
-        for j = 1:m
-           r1 = Rx_sequence(n1+j-1) * S1(j); 
-           r1_sum = [r1_sum r1];
-           
-           r2 = Rx_sequence(n1+j-1) .* S2(j); 
-           r2_sum = [r2_sum r2];
-        end
-        r_sum = r1_sum - r2_sum;
-    end 
-    C_out = [C_out r_sum];
-    C_out = C_out / max(C_out);
+    c_out = zeros(1, length(message));
+    g=(S1-S2);
+    c_out  = xcorr(Rx_sequence,g);
+    c_out_cut=c_out(ceil(length(c_out)/2):length(c_out));
+    
+    c_out_cut = c_out_cut / max(c_out_cut);
     
     %(5) Decision:
     Vth = (S1(taw) + S2(taw))/2;
@@ -113,7 +105,7 @@ for snr_i = 1:length(SNR)
         end
         
         %Make decision of Correlator:
-        C_current_sample = C_out(n1 + taw - 1);
+        C_current_sample = c_out_cut( taw* (i- 1)+1);
         if (C_current_sample > Vth)
             C_out_decided(i) = 1;
         end
@@ -140,7 +132,8 @@ hold
 semilogy(SNR, BER_MF, "linewidth", 1.5);
 title("BER vs SNR");
 legend("Simple detector", "MF");
-
+xlabel("SNR");
+ylabel("BER");
 
 figure
 semilogy(SNR, BER_simple, "linewidth", 1.5);
@@ -148,6 +141,8 @@ hold
 semilogy(SNR, BER_C, "linewidth", 1.5);
 title("BER vs SNR");
 legend("Simple detector","Correlator");
+xlabel("SNR");
+ylabel("BER");
 
 
 
